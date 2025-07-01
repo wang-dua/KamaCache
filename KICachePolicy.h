@@ -1,5 +1,5 @@
 #pragma once
-namespace {
+namespace KamaCache{
 	template <typename Key, typename Value>
 	class KICachePolicy
 	{
