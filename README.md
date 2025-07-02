@@ -14,3 +14,5 @@
 - std::unique_lock<std::shared_mutex> writeLock(mutex_); // 写线程独占
 
 3. KHashLruCaches 将缓存划分为若干子缓存, 每个子缓存维护自己的锁.
+
+4.KHashLruCaches类直接包含(使用)了KLruCache类

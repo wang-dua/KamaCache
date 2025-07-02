@@ -5,6 +5,7 @@
 #include <memory>
 #include <mutex> //互斥锁
 #include <unordered_map>
+#include <vector>
 
 namespace KamaCache
 {
@@ -282,12 +283,64 @@ namespace KamaCache
 
 
 
-	//KHashLruCaches----------
+	//KHashLruCaches----------对缓存分片, 该类直接包含(使用)KLruCache类
+	template <typename Key, typename Value>
 	class KHashLruCaches
+	{
+	private:
+		size_t capacity_;	//总容量
+		int sliceNum_;	//分片数
+		std::vector<std::unique_ptr<KLruCache<Key, Value>>> lruSliceCaches_; //KLruCache 对象指针矢量
+	private:
+		size_t Hash(Key key);
+	public:
+		KHashLruCaches(size_t capacity, int sliceNum):
+			capacity_(capacity),
+			sliceNum_(sliceNum > 0 ? sliceNum : std::thread::hardware_concurrency())
+		{
+			size_t sliceSize = std::ceil(capacity / static_cast<double>(sliceNum));
+			for (int i = 0; i < sliceNum_; i++)
+			{
+				//初始化vector, 每个对象的cache容量都是sliceSize
+				lruSliceCaches_.emplace_back(std::make_unique<KLruCache<Key, Value>>(sliceSize));
+			}
+		}
+		void put(Key key, Value value);
+		bool get(Key key, Value& value);
+		Value get(Key key);
+		int getSliceNum() const
+		{
+			return sliceNum_;
+		}
+	};
 
+	template <typename Key, typename Value>
+	size_t KHashLruCaches<Key, Value>::Hash(Key key)
+	{
+		std::hash<Key> hashFunc;
+		return hashFunc(key); //对key计算返回哈希值
+	}
 
+	template <typename Key, typename Value>
+	void KHashLruCaches<Key, Value>::put(Key key, Value value)
+	{
+		size_t sliceIndex = Hash(key) % sliceNum_; //使用hash映射到vector的索引分片
+		lruSliceCaches_[sliceIndex]->put(key, value);
+	}
 
+	template <typename Key, typename Value>
+	bool KHashLruCaches<Key, Value>::get(Key key, Value& value)
+	{
+		size_t sliceIndex = Hash(key) % sliceNum_; //
+		bool inCache = lruSliceCaches_[sliceIndex]->get(key, value);
+		return inCache;
+	}
 
-
-
+	template <typename Key, typename Value>
+	Value KHashLruCaches<Key, Value>::get(Key key)
+	{
+		Value value;
+		get(key, value);
+		return value;
+	}
 };
