@@ -1,8 +1,6 @@
+# KLruKCache
+get 和 put 都会增加页面访问次数, 当访问次数达到阈值k才会添加到缓存, 在这之前, historyList维护页面访问次数, historyValueMap存储的是访问未达到阈值的key-value
 # KLruCache
-每次访问 key 时，先查 historyList_，访问次数 +1；
-
-如果访问次数 < k：更新 historyMap_；
-
-如果访问次数 == k：把 value 从 historyMap_ 取出，加入主缓存；
-
-如果访问次数 > k：该 key 已在主缓存中，直接更新 LRU 顺序。
+可以当做k=1的KLruKCache
+# KHashLruCaches
+上述类中每一次的 put get 或是 
