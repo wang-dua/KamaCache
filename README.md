@@ -1,5 +1,6 @@
 
-1. get 和 put 都会增加页面访问次数, 当访问次数达到阈值k才会添加到缓存
+# KLruKCache
+1. 1. get 和 put 都会增加页面访问次数, 当访问次数达到阈值k才会添加到缓存
 
 2. 在这之前, historyList维护页面访问次数, historyValueMap存储的是访问未达到阈值的key-value
 # KLruCache
