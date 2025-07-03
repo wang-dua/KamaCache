@@ -12,7 +12,7 @@
 - std::shared_lock<std::shared_mutex> readLock(mutex_); // 多线程可读
 - std::unique_lock<std::shared_mutex> writeLock(mutex_); // 写线程独占
 - 
-3. KHashLruCaches 将缓存划分为若干子缓存, 每个子缓存维护自己的锁.
+3. KHashLruCaches 将缓存划分为若干子缓存, 每个子缓存维护自己的锁
 
 4. KHashLruCaches类直接包含(使用)了KLruCache类
 
@@ -28,7 +28,7 @@
 ## 优化点
 1. 引入访问次数平均值概念，当平均值大于最大平均值限制时将所有结点的访问次数减去最大平均值限制的一半或者一个固定值。
 
-2. 相当于热点数据“老化”了，这样可以避免频次计数溢出，也可以缓解缓存污染。
+2. 相当于热点数据“老化”了，这样可以避免频次计数溢出，也可以缓解缓存污染
 
 # KHashLfuCache
 1. 类似于KHashLruCaches, 分片处理
