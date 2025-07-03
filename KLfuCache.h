@@ -93,6 +93,38 @@ namespace KamaCache
 		void updateMinFreq();
 	};
 
+	template<typename Key, typename Value>
+	class KHashLfuCache
+	{
+	private:
+		size_t capacity_;
+		int sliceNum_;
+		std::vector<std::unique_ptr<KLfuCache<Key, Value>>> lfuSliceCaches_;
+	public:
+		KHashLfuCache(size_t capacity, int sliceNum, int maxAverageNum = 10):
+		capacity_(capacity),
+		sliceNum_(sliceNum > 0 ? sliceNum : std::thread::hardware_concurrency())
+		{
+			//ceil向上取整可确保每个lru的size都足够
+			size_t sliceSize = std::ceil(capacity / static_cast<double>(sliceNum));
+			for (int i = 0; i < sliceNum; i++)
+			{
+				//emplace_back直接在尾部构造vector元素
+				lfuSliceCaches_.emplace_back(std::make_unique<KLfuCache<Key, Value>>(sliceSize, maxAverageNum));
+			}
+		}
+
+		void put(Key key, Value value);
+		Value get(Key key);
+		bool get(Key key, Value& value);
+		void purge();
+	private:
+		size_t Hash(Key key);
+
+	};
+
+
+
 	template <typename Key, typename Value>
 	bool FreqList<Key, Value>::isEmpty() const
 	{
@@ -294,4 +326,46 @@ namespace KamaCache
 		if (minFreq_ == INT8_MAX)
 			minFreq_ = 1;
 	}
+
+
+	template <typename Key, typename Value>
+	void KHashLfuCache<Key, Value>::put(Key key, Value value)
+	{
+		size_t sliceIndex = Hash(key) % sliceNum_;
+		lfuSliceCaches_[sliceIndex]->put(key, value);
+	}
+
+	template <typename Key, typename Value>
+	Value KHashLfuCache<Key, Value>::get(Key key)
+	{
+		Value value{};
+		get(key, value);
+		return value;
+	}
+
+	template <typename Key, typename Value>
+	bool KHashLfuCache<Key, Value>::get(Key key, Value& value)
+	{
+		size_t sliceIndex = Hash(key) % sliceNum_;
+		return lfuSliceCaches_[sliceIndex]->get(key, value);
+	}
+
+	template <typename Key, typename Value>
+	void KHashLfuCache<Key, Value>::purge()
+	{
+		for (auto& lfuSliceCache : lfuSliceCaches_)
+			lfuSliceCache->purge();
+	}
+
+	template <typename Key, typename Value>
+	size_t KHashLfuCache<Key, Value>::Hash(Key key)
+	{
+		std::hash<Key> Hash;
+		return Hash(key);
+	}
+
 }
+
+
+
+
