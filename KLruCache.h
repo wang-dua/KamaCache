@@ -1,9 +1,7 @@
 #pragma once
 #include "KICachePolicy.h"
-#include <cstring>
-#include <list>
 #include <memory>
-#include <mutex> //ª•≥‚À¯
+#include <mutex> //ª•≥‚¡ø
 #include <unordered_map>
 #include <vector>
 
@@ -217,8 +215,8 @@ namespace KamaCache
 		k_(k)
 		{}
 
-		Value get(Key key);
-		void put(Key key, Value value);
+		Value get(Key key) override;
+		void put(Key key, Value value) override;
 	};
 
 	template<typename Key, typename Value>

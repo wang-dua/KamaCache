@@ -3,6 +3,7 @@
   <ItemGroup>
     <ClInclude Include="KICachePolicy.h" />
     <ClInclude Include="KLruCache.h" />
+    <ClInclude Include="KLfuCache.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp" />

@@ -1,70 +1,54 @@
 #include "KLruCache.h"
 #include <iostream>
+#include "KLfuCache.h"
 #include <string>
+using KamaCache::KLruCache;
+using KamaCache::KLruKCache;
+using KamaCache::KHashLruCaches;
+using std::cout;
+using std::endl;
+using KamaCache::KLfuCache;
+using std::string;
 
+void printCacheStats(KLfuCache<int, std::string>& cache) {
+    std::cout << "---- Info ----\n";
+    std::cout << "maxAverage: " << 100 << "\n"; // 本测试设定 maxAverageNum=100
+    std::cout << "curTotalFreq " << cache.getTotalNum() << "\n";
+    std::cout << "curAverageFreq: " << cache.getAverageFreq() << "\n";
+    std::cout << "--------------------\n";
+}
 int main() {
-    using KamaCache::KLruCache;
-    using KamaCache::KLruKCache;
-    using KamaCache::KHashLruCaches;
-    using std::cout;
-    using std::endl;
+    std::cout << "\n========\n";
+    KLfuCache<int, std::string> cache(3, 100);  // 设置最大平均访问频次为 100
 
-	KHashLruCaches<int, std::string> hashCache(5, 2);
-	hashCache.put(1, "wang");
-	hashCache.put(2, "xu");
-	hashCache.put(3, "Li");
-	hashCache.put(4, "wen");
-	hashCache.put(5, "mu");
-	 //
-	std::string name1 = hashCache.get(1);
-	cout << "1" << " " << name1 << "\n";
-    // if (hashCache.get(2, name1))
-    // {
-    //     cout << "2" << " " << name1 << "\n";
-    // }
+    cache.put(1, "A");
+    cache.put(2, "B");
+    cache.put(3, "C");
 
-
-
-    /*KHashLruCaches<std::string, std::string> cache(100, 4);
-
-    // 插入一些键值对
-    cache.put("apple", "red");
-    cache.put("banana", "yellow");
-    cache.put("grape", "purple");
-
-    // 尝试取出数据
+    int n = cache.getTotalNum();
     std::string val;
-
-    if (cache.get("apple", val)) {
-        std::cout << "apple: " << val << std::endl;
-    }
-    else {
-        std::cout << "apple not found\n";
-    }
-
-    if (cache.get("banana", val)) {
-        std::cout << "banana: " << val << std::endl;
-    }
-    else {
-        std::cout << "banana not found\n";
+    std::cout << "\n==== improve key=1 freq ====\n";
+    for (int i = 1; i <= 600; ++i) {
+        cache.get(1, val);
+        if (i % 100 == 0) {
+            std::cout << "access key=1 " << i << " times\n";
+            printCacheStats(cache);
+            std::cout << "A freq: " << cache.nodeFreq(1) << "\n\n";
+        }
     }
 
-    if (cache.get("grape", val)) {
-        std::cout << "grape: " << val << std::endl;
-    }
-    else {
-        std::cout << "grape not found\n";
+    std::cout << "\n==== Insert new cache, observe status====\n";
+    cache.put(4, "D"); 
+
+    // 验证缓存状态
+    std::cout << "key exists or not: \n";
+    for (int k = 1; k <= 4; ++k) {
+        bool hit = cache.get(k, val);
+    	std::cout << "Key " << k << ": " << (hit ? "exist" : "not exist") << "\n";
+        if (hit)
+            std::cout << "freq: " << cache.nodeFreq(k) << "\n";
     }
 
-    if (cache.get("orange", val)) {
-        std::cout << "orange: " << val << std::endl;
-    }
-    else {
-        std::cout << "orange not found (as expected)\n";
-    }
-
-    std::cout << "sliceNum = " << cache.getSliceNum() << std::endl;
-
-    return 0;*/
+    std::cout << "\nDone\n";
     return 0;
 }

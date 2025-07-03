@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="KICachePolicy.h" />
+    <ClInclude Include="KLfuCache.h" />
     <ClInclude Include="KLruCache.h" />
   </ItemGroup>
   <ItemGroup>
